@@ -64,14 +64,6 @@ Converted with **softmax** (temperature-scaled) → win probabilities.
 
 ---
 
-### 8. Evaluation Metrics
-- **Brier Score**: Measures calibration of predicted probabilities vs. observed outcomes.  
-- **Log Loss**: Penalizes overconfident wrong predictions.  
-
-**Why**: Both ensure the model balances accuracy with reliability, not just raw hit rate.
-
----
-
 ## 📂 Project Structure
 
 ```
