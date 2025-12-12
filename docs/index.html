@@ -1,0 +1,442 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>F1 Race Prediction Project</title>
+
+  <style>
+    :root {
+      --bg: #0b1020;
+      --card: #111a33;
+      --text: #e9ecf1;
+      --muted: #b7c0d8;
+      --accent: #5dd6ff;
+      --border: rgba(255,255,255,0.12);
+      --good:#66ff99;
+      --warn:#ffd166;
+      --bad:#ff6b6b;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: linear-gradient(180deg, var(--bg), #070a14);
+      color: var(--text);
+      line-height: 1.55;
+    }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .wrap { max-width: 1150px; margin: 0 auto; padding: 26px; }
+
+    /* ---------- NAV ---------- */
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 22px;
+    }
+
+    .brand {
+      font-weight: 800;
+      letter-spacing: 0.4px;
+      font-size: 18px;
+    }
+
+    .links a {
+      margin-left: 16px;
+      color: var(--muted);
+    }
+
+    .links a:hover { color: var(--text); }
+
+    /* ---------- HERO ---------- */
+    .hero {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 22px;
+      padding: 24px;
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      background: rgba(17,26,51,0.65);
+      align-items: center;
+    }
+
+    .hero h1 {
+      margin: 0 0 10px;
+      font-size: 38px;
+      line-height: 1.15;
+    }
+
+    .hero p {
+      margin: 0 0 14px;
+      color: var(--muted);
+      max-width: 64ch;
+    }
+
+    .btns { display: flex; gap: 12px; flex-wrap: wrap; }
+
+    .btn {
+      padding: 10px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.05);
+      color: var(--text);
+      display: inline-block;
+    }
+
+    .btn.primary {
+      background: rgba(93,214,255,0.2);
+      border-color: rgba(93,214,255,0.35);
+    }
+
+    .hero img{
+      width: 100%;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.03);
+    }
+
+    /* ---------- STATS ---------- */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4,1fr);
+      gap: 14px;
+      margin-top: 22px;
+    }
+
+    .card {
+      padding: 14px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: rgba(17,26,51,0.55);
+    }
+
+    .card .k {
+      font-size: 12px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .card .v {
+      margin-top: 6px;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    /* ---------- SECTION ---------- */
+    .section { margin-top: 40px; }
+    .section h2 { margin-bottom: 8px; }
+    .section p { color: var(--muted); margin-top: 0; }
+
+    select {
+      background: rgba(17,26,51,0.75);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 14px;
+      min-width: 260px;
+    }
+
+    /* ---------- COMPARISON ---------- */
+    .compare {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-top: 18px;
+    }
+
+    .panel {
+      border: 1px solid var(--border);
+      background: rgba(17,26,51,0.55);
+      border-radius: 16px;
+      padding: 14px;
+      min-height: 240px;
+    }
+
+    .panel h3 {
+      margin: 0 0 10px;
+      font-size: 16px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 44px 1fr 60px;
+      gap: 8px;
+      padding: 4px 0;
+      font-size: 14px;
+      font-family: ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;
+    }
+
+    .pos { color: var(--muted); }
+
+    .match { color: var(--good); font-weight: 700; }
+    .close { color: var(--warn); font-weight: 700; }
+    .miss  { color: var(--bad);  font-weight: 700; }
+
+    /* ---------- METRICS ---------- */
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(3,1fr);
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .hint {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .footer {
+      margin-top: 46px;
+      padding-top: 18px;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    @media (max-width: 900px) {
+      .hero { grid-template-columns: 1fr; }
+      .grid { grid-template-columns: repeat(2,1fr); }
+      .compare { grid-template-columns: 1fr; }
+      select { min-width: 100%; }
+    }
+  </style>
+</head>
+
+<body>
+<div class="wrap">
+
+  <div class="nav">
+    <div class="brand">F1 Race Predictor</div>
+    <div class="links">
+      <a href="index.html">Home</a>
+      <a href="predictions.html">Predictions</a>
+      <a href="how-it-works.html">How it works</a>
+    </div>
+  </div>
+
+  <div class="hero">
+    <div>
+      <h1>Formula 1 Race Predictions<br>from Historical Data</h1>
+      <p>
+        A statistical prediction pipeline using historical performance, qualifying pace,
+        and championship context — with Monte Carlo simulation to model race outcomes.
+      </p>
+      <div class="btns">
+        <a class="btn primary" href="#compare">Explore Predictions</a>
+        <a class="btn" id="githubLink" href="#">View GitHub</a>
+      </div>
+      <div class="hint">Tip: update the GitHub link in the code (search for <b>githubLink</b>).</div>
+    </div>
+
+    <!-- ✅ HERO IMAGE (change path if your folder name differs) -->
+    <img src="assets/R20_Mexico_City_Grand_Prix/podium_visual.png" alt="F1 podium visual">
+  </div>
+
+  <div class="grid">
+    <div class="card"><div class="k">Approach</div><div class="v">Statistical Modeling</div></div>
+    <div class="card"><div class="k">Inputs</div><div class="v">Championship + Qualifying</div></div>
+    <div class="card"><div class="k">Simulation</div><div class="v">Monte Carlo</div></div>
+    <div class="card"><div class="k">Coverage</div><div class="v">After United States GP</div></div>
+  </div>
+
+  <div id="compare" class="section">
+    <h2>Predicted vs Actual Results</h2>
+    <p>Select a race to compare the model’s prediction against the real finishing order.</p>
+
+    <div style="margin:12px 0">
+      <select id="raceSelect"></select>
+    </div>
+
+    <div class="compare">
+      <div class="panel">
+        <h3 id="predLabel">Prediction</h3>
+        <div id="predRows"></div>
+      </div>
+
+      <div class="panel">
+        <h3 id="actLabel">Actual Result</h3>
+        <div id="actRows"></div>
+      </div>
+    </div>
+
+    <div class="metrics">
+      <div class="card"><div class="v" id="metricTop10">Top-10 exact matches: —</div></div>
+      <div class="card"><div class="v" id="metricAvgErr">Avg position error: —</div></div>
+      <div class="card"><div class="v" id="metricPodium">Podium hit: —</div></div>
+    </div>
+
+    <div class="hint">
+      If numbers stay as “—”, make sure you’re running the site via:
+      <span class="pos">python3 -m http.server</span> (not by double-clicking the HTML file).
+    </div>
+  </div>
+
+  <div class="footer">
+    Built by Ravish • F1 Prediction Project
+  </div>
+</div>
+
+<script>
+  document.getElementById("githubLink").href =
+    "https://github.com/Ravishsingh703/F1-Race-Result-Predictor";
+
+  const raceSelect = document.getElementById("raceSelect");
+  const predRows = document.getElementById("predRows");
+  const actRows = document.getElementById("actRows");
+  const predLabel = document.getElementById("predLabel");
+  const actLabel = document.getElementById("actLabel");
+
+  const metricTop10 = document.getElementById("metricTop10");
+  const metricAvgErr = document.getElementById("metricAvgErr");
+  const metricPodium = document.getElementById("metricPodium");
+
+  // Uses manifest.json with paths:
+  // - pre:  data/pre-quali-predictions/...
+  // - post: data/post-quali-predictions/...
+  // - actual: data/actual-results/...
+  const MODE = "post"; // change to "pre" if you want pre-quali comparison
+
+  function parseCSV(text) {
+    const lines = text.trim().split(/\r?\n/);
+    const out = [];
+    if (lines.length < 2) return out;
+
+    // Find driver column index if possible
+    const header = lines[0].split(",").map(s => s.trim().toLowerCase());
+    let drvIdx = header.indexOf("abbreviation");
+    if (drvIdx === -1) drvIdx = header.indexOf("driver");
+    if (drvIdx === -1) drvIdx = header.indexOf("code");
+    if (drvIdx === -1) drvIdx = 1; // fallback: second column
+
+    for (let i = 1; i < lines.length; i++) {
+      const cols = lines[i].split(",").map(s => s.trim());
+      const d = cols[drvIdx];
+      if (!d) continue;
+      out.push(d.toUpperCase());
+    }
+    return out;
+  }
+
+  function posMap(list) {
+    const m = new Map();
+    list.forEach((d,i) => m.set(d, i+1));
+    return m;
+  }
+
+  function render(list, otherMap, target) {
+    target.innerHTML = "";
+    list.forEach((d,i) => {
+      const p = i+1;
+      const a = otherMap.get(d);
+      const cls = !a ? "miss" : (p===a ? "match" : (Math.abs(p-a)<=2 ? "close" : "miss"));
+      target.innerHTML +=
+        `<div class="row">
+           <span class="pos">P${p}</span>
+           <span class="${cls}">${d}</span>
+           <span class="pos">${a ? "→ P"+a : "→ —"}</span>
+         </div>`;
+    });
+  }
+
+  function setLoading(label="Loading…") {
+    predLabel.textContent = label;
+    actLabel.textContent = label;
+    predRows.innerHTML = `<div class="row"><span class="pos">…</span><span class="close">Loading</span><span class="pos">…</span></div>`;
+    actRows.innerHTML  = `<div class="row"><span class="pos">…</span><span class="close">Loading</span><span class="pos">…</span></div>`;
+    metricTop10.textContent = "Top-10 exact matches: —";
+    metricAvgErr.textContent = "Avg position error: —";
+    metricPodium.textContent = "Podium hit: —";
+  }
+
+  function setError(msg) {
+    predLabel.textContent = "Error loading data";
+    actLabel.textContent = "Fix file paths";
+    predRows.innerHTML = `<div class="row"><span class="pos">!</span><span class="miss">${msg}</span><span class="pos"></span></div>`;
+    actRows.innerHTML  = `<div class="row"><span class="pos"></span><span class="miss">Check manifest.json + CSV filenames</span><span class="pos"></span></div>`;
+  }
+
+  async function init() {
+    try {
+      setLoading();
+
+      const manifestRes = await fetch("data/manifest.json");
+      if (!manifestRes.ok) throw new Error("Missing: data/manifest.json");
+      const manifest = await manifestRes.json();
+
+      // Build dropdown
+      raceSelect.innerHTML = "";
+      manifest.forEach((r,i) => {
+        const o = document.createElement("option");
+        o.value = i;
+        o.textContent = r.label || `R${r.round}`;
+        raceSelect.appendChild(o);
+      });
+
+      async function loadIndex(i) {
+        try {
+          setLoading();
+
+          const entry = manifest[i];
+          const predPath = (MODE === "pre") ? entry.pre : entry.post;
+          if (!predPath) throw new Error(`No ${MODE} file set for ${entry.label}.`);
+
+          const [pRes, aRes] = await Promise.all([
+            fetch(predPath),
+            fetch(entry.actual)
+          ]);
+
+          if (!pRes.ok) throw new Error(`Missing prediction file: ${predPath}`);
+          if (!aRes.ok) throw new Error(`Missing actual file: ${entry.actual}`);
+
+          const pred = parseCSV(await pRes.text());
+          const act  = parseCSV(await aRes.text());
+
+          predLabel.textContent = (MODE === "pre") ? "Pre-Quali Prediction" : "Post-Quali Prediction";
+          actLabel.textContent = "Actual Result";
+
+          const pm = posMap(pred);
+          const am = posMap(act);
+
+          render(pred, am, predRows);
+          render(act, pm, actRows);
+
+          // Metrics
+          let top10=0, err=0;
+          pred.forEach((d, idx) => {
+            const p = idx + 1;
+            const a = am.get(d);
+            if (a && p === a && p <= 10) top10++;
+            if (a) err += Math.abs(p - a);
+          });
+
+          metricTop10.textContent = `Top-10 exact matches: ${top10}/10`;
+          metricAvgErr.textContent = `Avg position error: ${pred.length ? (err/pred.length).toFixed(2) : "—"}`;
+          metricPodium.textContent =
+            `Podium hit: ${pred.slice(0,3).filter(x => act.slice(0,3).includes(x)).length}/3`;
+
+        } catch (e) {
+          setError(e.message);
+        }
+      }
+
+      raceSelect.onchange = () => loadIndex(raceSelect.value);
+      loadIndex(0);
+
+    } catch (e) {
+      setError(e.message);
+    }
+  }
+
+  init();
+</script>
+</body>
+</html>

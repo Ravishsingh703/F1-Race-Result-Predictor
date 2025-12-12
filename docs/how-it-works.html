@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>How it works • F1 Race Predictor</title>
+
+  <style>
+    :root{
+      --bg:#0b1020;
+      --card:#111a33;
+      --text:#e9ecf1;
+      --muted:#b7c0d8;
+      --accent:#5dd6ff;
+      --border:rgba(255,255,255,0.12);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      background:linear-gradient(180deg,var(--bg),#070a14);
+      color:var(--text);
+      line-height:1.6;
+    }
+    a{color:var(--accent);text-decoration:none}
+    a:hover{text-decoration:underline}
+    .wrap{max-width:1150px;margin:0 auto;padding:26px}
+
+    .nav{display:flex;justify-content:space-between;align-items:center;padding-bottom:22px}
+    .brand{font-weight:800;letter-spacing:.4px;font-size:18px}
+    .links a{margin-left:16px;color:var(--muted)}
+    .links a:hover{color:var(--text)}
+
+    .hero{
+      padding:22px;
+      border-radius:18px;
+      border:1px solid var(--border);
+      background:rgba(17,26,51,0.65);
+    }
+    .hero h1{margin:0 0 8px;font-size:30px}
+    .hero p{margin:0;color:var(--muted);max-width:85ch}
+
+    .section{margin-top:22px}
+    .card{
+      padding:16px;
+      border-radius:16px;
+      border:1px solid var(--border);
+      background:rgba(17,26,51,0.55);
+      margin-top:12px;
+    }
+    .card h2{margin:0 0 6px;font-size:18px}
+    .card p{margin:0;color:var(--muted)}
+
+    .flow{
+      margin-top:14px;
+      display:grid;
+      gap:10px;
+    }
+    .step{
+      padding:12px 14px;
+      border-radius:14px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,0.04);
+    }
+    .step b{display:block;margin-bottom:4px}
+    code{
+      background:rgba(255,255,255,0.06);
+      padding:2px 6px;
+      border-radius:8px;
+      border:1px solid rgba(255,255,255,0.10);
+      font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;
+      font-size:13px;
+    }
+    ul{margin:10px 0 0 18px;color:var(--muted)}
+    li{margin:6px 0}
+    .footer{
+      margin-top:40px;padding-top:18px;
+      border-top:1px solid var(--border);
+      color:var(--muted);font-size:13px
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="nav">
+      <div class="brand">F1 Race Predictor</div>
+      <div class="links">
+        <a href="index.html">Home</a>
+        <a href="predictions.html">Predictions</a>
+        <a href="how-it-works.html">How it works</a>
+      </div>
+    </div>
+
+    <div class="hero">
+      <h1>How it works</h1>
+      <p>
+        This project builds race outcome predictions using historical F1 data, qualifying pace, and
+        championship momentum. It converts these signals into probabilities and uses Monte Carlo
+        simulation to estimate finishing-order distributions and generate a final predicted order.
+      </p>
+    </div>
+
+    <div class="section">
+      <div class="card">
+        <h2>Pipeline overview</h2>
+        <p>High-level flow from raw data → predictions → visuals.</p>
+
+        <div class="flow">
+          <div class="step">
+            <b>1) Data + caching</b>
+            Uses <code>fastf1</code> to access race/quali sessions and build consistent datasets.
+          </div>
+          <div class="step">
+            <b>2) Feature engineering</b>
+            Creates driver-level features (form, standings context, qualifying gap / grid position).
+          </div>
+          <div class="step">
+            <b>3) Win probability model</b>
+            Combines weighted components (championship rating, rolling form, pace score) into a win probability distribution.
+          </div>
+          <div class="step">
+            <b>4) Monte Carlo simulation</b>
+            Runs many simulations to estimate the probability of each driver finishing P1…Pn (a finish probability matrix).
+          </div>
+          <div class="step">
+            <b>5) Final predicted order + visual outputs</b>
+            Produces a ranked finishing order and charts used in the website.
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Key scripts in this repo</h2>
+        <p>These are the main “moving parts” you’ll see in the code.</p>
+        <ul>
+          <li><code>global_runner.py</code> — one run executes the full pipeline in the correct order.</li>
+          <li><code>quali_feat.py</code> — generates qualifying feature CSVs used by the post-quali predictor.</li>
+          <li><code>predictor_with_quali_results.py</code> — creates post-quali predictions (pace + grid + champ context).</li>
+          <li><code>remaining_race_simulator.py</code> — simulates season outcomes from remaining rounds (WDC projection).</li>
+          <li><code>visualiser.py</code> — generates charts/images used for presenting predictions.</li>
+          <li><code>rolling_form.py</code> — maintains rolling performance signals.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>How to run locally</h2>
+        <p>Typical workflow for running the project and the website.</p>
+
+        <ul>
+          <li>Run the pipeline from the project root (example): <code>python3 Code/global_runner.py</code></li>
+          <li>Generated outputs are saved under <code>Data_Processed/...</code></li>
+          <li>Website files live in <code>docs/</code></li>
+          <li>To preview the site locally: <code>cd docs</code> then <code>python3 -m http.server 8000</code> and open <code>http://localhost:8000</code></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>How the website reads data</h2>
+        <p>
+          The site uses <code>docs/data/manifest.json</code> as a “map” of available rounds.
+          Each entry points to:
+        </p>
+        <ul>
+          <li>Pre-quali CSV (optional)</li>
+          <li>Post-quali CSV (optional)</li>
+          <li>Actual results CSV</li>
+        </ul>
+        <p style="margin-top:10px;color:var(--muted)">
+          This keeps the site flexible even when some rounds only have pre- or post-quali predictions.
+        </p>
+      </div>
+    </div>
+
+    <div class="footer">
+      Built by Ravish • F1 Prediction Project
+    </div>
+  </div>
+</body>
+</html>

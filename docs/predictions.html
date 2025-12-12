@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Predictions • F1 Race Predictor</title>
+
+  <style>
+    :root{
+      --bg:#0b1020;
+      --card:#111a33;
+      --text:#e9ecf1;
+      --muted:#b7c0d8;
+      --accent:#5dd6ff;
+      --border:rgba(255,255,255,0.12);
+      --good:#66ff99;
+      --warn:#ffd166;
+      --bad:#ff6b6b;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      background:linear-gradient(180deg,var(--bg),#070a14);
+      color:var(--text);
+      line-height:1.55;
+    }
+    a{color:var(--accent);text-decoration:none}
+    a:hover{text-decoration:underline}
+    .wrap{max-width:1150px;margin:0 auto;padding:26px}
+
+    .nav{display:flex;justify-content:space-between;align-items:center;padding-bottom:22px}
+    .brand{font-weight:800;letter-spacing:.4px;font-size:18px}
+    .links a{margin-left:16px;color:var(--muted)}
+    .links a:hover{color:var(--text)}
+
+    .hero{
+      padding:22px;
+      border-radius:18px;
+      border:1px solid var(--border);
+      background:rgba(17,26,51,0.65);
+    }
+    .hero h1{margin:0 0 8px;font-size:30px}
+    .hero p{margin:0;color:var(--muted);max-width:75ch}
+
+    .section{margin-top:26px}
+    .section h2{margin:0 0 8px;font-size:20px}
+    .section p{margin:0;color:var(--muted)}
+
+    select{
+      margin-top:12px;
+      background:rgba(17,26,51,0.75);
+      color:var(--text);
+      border:1px solid var(--border);
+      padding:10px 12px;
+      border-radius:10px;
+      font-size:14px;
+      min-width:320px;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:14px;
+      margin-top:16px;
+    }
+    .card{
+      padding:14px;
+      border-radius:14px;
+      border:1px solid var(--border);
+      background:rgba(17,26,51,0.55);
+    }
+    .card .k{
+      font-size:12px;color:var(--muted);
+      text-transform:uppercase;letter-spacing:.08em
+    }
+    .card .v{margin-top:6px;font-size:16px;font-weight:700}
+
+    .tables{
+      display:grid;
+      grid-template-columns:1fr 1fr 1fr;
+      gap:14px;
+      margin-top:18px;
+    }
+    .panel{
+      border:1px solid var(--border);
+      background:rgba(17,26,51,0.55);
+      border-radius:16px;
+      padding:14px;
+      min-height:360px;
+      overflow:hidden;
+    }
+    .panel h3{margin:0 0 10px;font-size:16px}
+    .sub{color:var(--muted);font-size:13px;margin-top:-6px;margin-bottom:10px}
+
+    .rows{
+      max-height:420px;
+      overflow:auto;
+      padding-right:6px;
+    }
+    .row{
+      display:grid;
+      grid-template-columns:44px 1fr 70px;
+      gap:8px;
+      padding:4px 0;
+      font-size:13px;
+      font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;
+    }
+    .pos{color:var(--muted)}
+    .match{color:var(--good);font-weight:700}
+    .close{color:var(--warn);font-weight:700}
+    .miss{color:var(--bad);font-weight:700}
+
+    .note{margin-top:10px;color:var(--muted);font-size:13px}
+    .footer{
+      margin-top:40px;padding-top:18px;
+      border-top:1px solid var(--border);
+      color:var(--muted);font-size:13px
+    }
+
+    @media (max-width: 1000px){
+      .tables{grid-template-columns:1fr}
+      .grid{grid-template-columns:1fr}
+      select{min-width:100%}
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="nav">
+      <div class="brand">F1 Race Predictor</div>
+      <div class="links">
+        <a href="index.html">Home</a>
+        <a href="predictions.html">Predictions</a>
+        <a href="how-it-works.html">How it works</a>
+      </div>
+    </div>
+
+    <div class="hero">
+      <h1>Predictions</h1>
+      <p>
+        Choose a Grand Prix and view the predicted orders (pre- and post-quali) alongside the actual result.
+        This page reads directly from your <b>data/manifest.json</b> and the CSV files listed there.
+      </p>
+      <select id="raceSelect"></select>
+    </div>
+
+    <div class="section">
+      <h2>Accuracy summary</h2>
+      <p>Calculated vs actual result (based on the prediction mode shown).</p>
+
+      <div class="grid">
+        <div class="card"><div class="k">Top-10 exact matches</div><div class="v" id="metricTop10">—</div></div>
+        <div class="card"><div class="k">Average position error</div><div class="v" id="metricAvgErr">—</div></div>
+        <div class="card"><div class="k">Podium hit</div><div class="v" id="metricPodium">—</div></div>
+      </div>
+
+      <div class="note">
+        Tip: This page needs the local server (or GitHub Pages) to load CSVs.
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Orders</h2>
+      <p>Each list highlights how close the driver was to the actual finishing position.</p>
+
+      <div class="tables">
+        <div class="panel">
+          <h3>Pre-Quali Prediction</h3>
+          <div class="sub" id="preSub">—</div>
+          <div class="rows" id="preRows"></div>
+        </div>
+
+        <div class="panel">
+          <h3>Post-Quali Prediction</h3>
+          <div class="sub" id="postSub">—</div>
+          <div class="rows" id="postRows"></div>
+        </div>
+
+        <div class="panel">
+          <h3>Actual Result</h3>
+          <div class="sub" id="actSub">—</div>
+          <div class="rows" id="actRows"></div>
+        </div>
+      </div>
+
+      <div class="note">
+        Legend: <span class="match">exact</span> • <span class="close">±2 positions</span> • <span class="miss">off</span>
+      </div>
+    </div>
+
+    <div class="footer">
+      Built by Ravish • F1 Prediction Project
+    </div>
+  </div>
+
+<script>
+  const raceSelect = document.getElementById("raceSelect");
+
+  const preRows = document.getElementById("preRows");
+  const postRows = document.getElementById("postRows");
+  const actRows = document.getElementById("actRows");
+
+  const preSub = document.getElementById("preSub");
+  const postSub = document.getElementById("postSub");
+  const actSub = document.getElementById("actSub");
+
+  const metricTop10 = document.getElementById("metricTop10");
+  const metricAvgErr = document.getElementById("metricAvgErr");
+  const metricPodium = document.getElementById("metricPodium");
+
+  function parseCSV(text){
+    const lines = text.trim().split(/\r?\n/);
+    if(lines.length < 2) return [];
+    const header = lines[0].split(",").map(s => s.trim().toLowerCase());
+    let drvIdx = header.indexOf("abbreviation");
+    if(drvIdx === -1) drvIdx = header.indexOf("driver");
+    if(drvIdx === -1) drvIdx = header.indexOf("code");
+    if(drvIdx === -1) drvIdx = 1;
+
+    const out = [];
+    for(let i=1;i<lines.length;i++){
+      const cols = lines[i].split(",").map(s => s.trim());
+      const d = cols[drvIdx];
+      if(!d) continue;
+      out.push(d.toUpperCase());
+    }
+    return out;
+  }
+
+  function posMap(list){
+    const m = new Map();
+    list.forEach((d,i)=>m.set(d,i+1));
+    return m;
+  }
+
+  function cls(predPos, actualPos){
+    if(!actualPos) return "miss";
+    const diff = Math.abs(predPos-actualPos);
+    if(diff === 0) return "match";
+    if(diff <= 2) return "close";
+    return "miss";
+  }
+
+  function renderList(list, actualMap, container){
+    container.innerHTML = "";
+    if(!list || list.length === 0){
+      container.innerHTML = `<div class="row"><span class="pos">—</span><span class="miss">Missing</span><span class="pos"></span></div>`;
+      return;
+    }
+    list.forEach((d,i)=>{
+      const p = i+1;
+      const a = actualMap.get(d);
+      const c = cls(p,a);
+      container.innerHTML += `
+        <div class="row">
+          <span class="pos">P${p}</span>
+          <span class="${c}">${d}</span>
+          <span class="pos">${a ? "→ P"+a : "→ —"}</span>
+        </div>`;
+    });
+  }
+
+  function setMetrics(pred, act){
+    if(!pred || pred.length === 0 || !act || act.length === 0){
+      metricTop10.textContent = "—";
+      metricAvgErr.textContent = "—";
+      metricPodium.textContent = "—";
+      return;
+    }
+    const am = posMap(act);
+
+    let top10 = 0;
+    let err = 0;
+    let count = 0;
+
+    pred.forEach((d,i)=>{
+      const p = i+1;
+      const a = am.get(d);
+      if(!a) return;
+      if(p <= 10 && p === a) top10++;
+      err += Math.abs(p-a);
+      count++;
+    });
+
+    const predPod = new Set(pred.slice(0,3));
+    const actPod = new Set(act.slice(0,3));
+    let pod = 0;
+    predPod.forEach(x=>{ if(actPod.has(x)) pod++; });
+
+    metricTop10.textContent = `${top10}/10`;
+    metricAvgErr.textContent = count ? (err/count).toFixed(2) : "—";
+    metricPodium.textContent = `${pod}/3`;
+  }
+
+  async function fetchText(path){
+    const res = await fetch(path);
+    if(!res.ok) throw new Error(`Missing: ${path}`);
+    return await res.text();
+  }
+
+  async function loadManifest(){
+    const res = await fetch("data/manifest.json");
+    if(!res.ok) throw new Error("Missing: data/manifest.json");
+    return await res.json();
+  }
+
+  function setSub(el, text){ el.textContent = text; }
+
+  async function renderEntry(entry){
+    // reset UI
+    setSub(preSub, entry.pre ? "Loaded from CSV" : "Not available for this round");
+    setSub(postSub, entry.post ? "Loaded from CSV" : "Not available for this round");
+    setSub(actSub, entry.actual ? "Loaded from CSV" : "Missing actual CSV");
+
+    // load actual first (for comparison coloring)
+    const actText = entry.actual ? await fetchText(entry.actual) : "";
+    const act = actText ? parseCSV(actText) : [];
+    const am = posMap(act);
+
+    // load predictions (if present)
+    let pre = [];
+    let post = [];
+
+    if(entry.pre){
+      const preText = await fetchText(entry.pre);
+      pre = parseCSV(preText);
+    }
+    if(entry.post){
+      const postText = await fetchText(entry.post);
+      post = parseCSV(postText);
+    }
+
+    renderList(pre, am, preRows);
+    renderList(post, am, postRows);
+    renderList(act, am, actRows);
+
+    // metrics prefer post-quali if exists, else pre-quali
+    const metricPred = (post && post.length) ? post : pre;
+    setMetrics(metricPred, act);
+  }
+
+  async function init(){
+    try{
+      const manifest = await loadManifest();
+
+      raceSelect.innerHTML = "";
+      manifest.forEach((m,i)=>{
+        const opt = document.createElement("option");
+        opt.value = i;
+        opt.textContent = m.label || `Round ${m.round}`;
+        raceSelect.appendChild(opt);
+      });
+
+      raceSelect.addEventListener("change", async () => {
+        const entry = manifest[Number(raceSelect.value)];
+        await renderEntry(entry);
+      });
+
+      // default first
+      await renderEntry(manifest[0]);
+
+    } catch(e){
+      preRows.innerHTML = `<div class="row"><span class="pos">!</span><span class="miss">${e.message}</span><span class="pos"></span></div>`;
+      postRows.innerHTML = `<div class="row"><span class="pos"></span><span class="miss">Start server: python3 -m http.server</span><span class="pos"></span></div>`;
+      actRows.innerHTML = `<div class="row"><span class="pos"></span><span class="miss">Then open http://localhost:8000/</span><span class="pos"></span></div>`;
+    }
+  }
+
+  init();
+</script>
+</body>
+</html>

@@ -1,0 +1,44 @@
+[
+  {
+    "round": 19,
+    "label": "United States Grand Prix",
+    "pre": "data/pre-quali-predictions/R19_Pre.csv",
+    "post": "data/post-quali-predictions/R19_Post.csv",
+    "actual": "data/actual-results/R19_Actual.csv"
+  },
+  {
+    "round": 20,
+    "label": "Mexico City Grand Prix",
+    "pre": "data/pre-quali-predictions/R20_Pre.csv",
+    "post": "data/post-quali-predictions/R20_Post.csv",
+    "actual": "data/actual-results/R20_Actual.csv"
+  },
+  {
+    "round": 21,
+    "label": "São Paulo Grand Prix",
+    "pre": "data/pre-quali-predictions/R21_Pre.csv",
+    "post": "data/post-quali-predictions/R21_Post.csv",
+    "actual": "data/actual-results/R21_Actual.csv"
+  },
+  {
+    "round": 22,
+    "label": "Las Vegas Grand Prix",
+    "pre": "data/pre-quali-predictions/R22_Pre.csv",
+    "post": "data/post-quali-predictions/R22_Post.csv",
+    "actual": "data/actual-results/R22_Actual.csv"
+  },
+  {
+    "round": 23,
+    "label": "Qatar Grand Prix",
+    "pre": "data/pre-quali-predictions/R23_Pre.csv",
+    "post": "data/post-quali-predictions/R23_Post.csv",
+    "actual": "data/actual-results/R23_Actual.csv"
+  },
+  {
+    "round": 24,
+    "label": "Abu Dhabi Grand Prix",
+    "pre": "data/pre-quali-predictions/R24_Pre.csv",
+    "post": "data/post-quali-predictions/R24_Post.csv",
+    "actual": "data/actual-results/R24_Actual.csv"
+  }
+]
