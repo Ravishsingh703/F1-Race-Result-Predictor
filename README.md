@@ -1,126 +1,67 @@
 # 📌 F1 Predictor
 
 ## Overview
-An F1 World Drivers’ Championship (WDC) prediction model that combines **driver form, qualifying pace, track history, reliability, and championship standings** into a statistical framework. Predictions are simulated using **Monte Carlo methods** to generate both race-level and season-level outcomes.
+An end-to-end Formula 1 race and World Drivers’ Championship (WDC) prediction system that combines driver form, qualifying pace, track history, reliability, and championship context into a structured statistical framework. The project produces race-level predictions (pre- and post-qualifying) and evaluates them against actual race outcomes via an interactive public website. Predictions are generated using Monte Carlo simulation to model uncertainty and variability inherent in Formula 1.
 
----
+## 🌐 Live Website
+The project is deployed as an interactive website that allows users to explore predicted vs actual race results, pre-qualifying and post-qualifying predictions (when available), and race-by-race performance from the United States Grand Prix onwards. The site dynamically loads race data from CSV files using a manifest-based structure, allowing new races to be added without modifying frontend code.
+
+Live site: https://ravishsingh703.github.io/F1-Race-Result-Predictor/  
+Repository: https://github.com/Ravishsingh703/F1-Race-Result-Predictor
 
 ## ⚙️ Methods & Formulas
 
-### 1. Rolling Form (Driver Momentum)
-```
-RollingForm_d = ( Σ (0.75)^(n-1-i) * Points_{d,i} ) / ( Σ (0.75)^(n-1-i) )
-```
-Scaled 0–100 by dividing by 25 (max FIA points).  
-**Why**: Recent races matter more. Prevents rookies (e.g., Piastri) from being unfairly penalized by lack of long history.
+### Rolling Form (Driver Momentum)
+RollingForm_d = ( Σ (0.75)^(n-1-i) · Points_{d,i} ) / ( Σ (0.75)^(n-1-i) )
 
----
+Scaled to 0–100 by dividing by 25 (maximum FIA race points). Recent races are weighted more heavily to capture current momentum while avoiding unfair penalties for drivers with limited historical data.
 
-### 2. Qualifying Gap to Pole
-```
-GapToPole_d = t_d_best – t_pole_best
-```
-**Why**: Direct raw measure of car + driver pace, less noisy than race results.
+### Qualifying Gap to Pole
+GapToPole_d = t_d_best − t_pole_best
 
----
+Provides a direct, low-noise measure of raw car and driver pace, independent of race incidents and strategy effects.
 
-### 3. Pace Score
-Grid-position exponential decay:  
-- P1 = 100  
-- Score halves every *k* positions (half-life ~ 7).  
+### Pace Score
+Grid-position-based exponential decay where P1 = 100 and the score approximately halves every seven grid positions. This formulation preserves front-running separation while compressing midfield and backmarker differences.
 
-**Why**: Captures that small differences at the front matter more, while backmarkers converge.
+### Track Performance Score
+Custom historical scoring table (1st = 40, 2nd = 35, 3rd = 28 … 20th = 1), averaged per driver-track combination. This encodes driver–track affinity without over-rewarding midfield consistency.
 
----
+### DNF Probability
+P(DNF_d,track) = DNFs_d,track / Starts_d,track
 
-### 4. Track Performance Score
-Custom scoring table (1st=40, 2nd=35, 3rd=28 … 20th=1) averaged per track.  
-**Why**: Encodes historical driver–track skill without overweighting midfield consistency.
+Introduces reliability risk into predictions, defaulting to zero where historical data is unavailable.
 
----
-
-### 5. DNF Chance
-```
-P(DNF_{d,track}) = DNFs_{d,track} / Starts_{d,track}
-```
-**Why**: Introduces reliability risk into predictions. Defaults to 0 if no history.
-
----
-
-### 6. Driver Score → Win Probability
-```
+### Driver Score to Win Probability
 Score_d = a·RollingForm + b·Pace + c·TrackScore + d·Survival + e·ChampRating
-```
-Converted with **softmax** (temperature-scaled) → win probabilities.  
-**Why**: Softmax allows all drivers to have >0 chances, while *temperature* controls uncertainty (higher temp = more randomness, lower temp = sharper prediction).
 
----
+Scores are converted to probabilities using softmax with temperature scaling, ensuring all drivers retain non-zero probability while controlling prediction sharpness.
 
-### 7. Monte Carlo Simulations
-Randomized simulations model finishing orders and season outcomes.  
-Captures the **inherent unpredictability** of Formula 1 by accounting for rare events and random variance.
-
----
-
-## 📂 Project Structure
-
-```
-F1-Predictor/
-│
-├── Code/
-│   ├── fastf1.py                   # Cleans & processes raw race/quali data
-│   ├── rolling_form.py             # Builds rolling form, DNF chance, pace scores
-│   ├── quali_feat.py               # Features for quali-based predictions
-│   ├── predictor_with_quali_results.py # Predictor using quali data
-│   ├── remaining_race_simulator.py # Final simulator for WDC outcomes
-│
-├── Data/
-│   └── fastf1/                     # Raw race + quali data (2018–2025)
-│
-├── Data_Processed/
-│   ├── fastf1/                     # Cleaned data (per year)
-│   ├── driver_stats_over_years/    # DNF, podium rate, pit efficiency, rolling form
-│   ├── track_scores/               # Driver vs. track performance files
-│   ├── quali_feat/                 # Used in quali predictor
-│   ├── prediction_data/            # Intermediate pace, DNF, win prob files
-│   └── wdc_prediction/             # Final probabilities & predictions
-│
-└── README.md
-```
-
----
-
-## ▶️ Running Order
-
-1. **fastf1.py** → process raw data → `Data_Processed/fastf1/`  
-2. **rolling_form.py** → generate rolling form, DNF chance, pace scores → saved under `driver_stats_over_years/`  
-3. **quali_feat.py** → build quali features  
-4. **predictor_with_quali_results.py** → compute race-level predictions after quali  
-5. **remaining_race_simulator.py** → run Monte Carlo sims → WDC predictions in `wdc_prediction/`
-
----
+### Monte Carlo Simulation
+Repeated randomized simulations generate full finishing order distributions, podium probabilities, and season-level outcomes. This captures irreducible uncertainty and rare events inherent to Formula 1.
 
 ## 📊 Statistics & Evaluation
+The project applies softmax with temperature scaling, exponential decay weighting, and Monte Carlo simulation to ensure predictions remain interpretable, probabilistic, and robust. Evaluation is performed by comparing predicted finishing positions against actual race results, focusing on top-10 positional accuracy, podium hit rate, and average positional error. These comparisons are visualized on the deployed website.
 
-This project applies several statistical models and concepts to ensure predictions are both realistic and robust:
+## 📂 Project Structure
+F1-Predictor/  
+├── Code/ – data processing, feature engineering, and prediction logic  
+├── docs/ – GitHub Pages website  
+│   ├── index.html – homepage (predicted vs actual)  
+│   ├── predictions.html – detailed prediction views  
+│   ├── how-it-works.html – methodology explanation  
+│   ├── assets/ – visual assets  
+│   └── data/ – CSV files and manifest  
+│       ├── actual-results/  
+│       ├── pre-quali-predictions/  
+│       └── post-quali-predictions/  
+└── README.md
 
-- **Softmax with Temperature Scaling**  
-  Converts driver scores into win probabilities.  
-  - Low temperature (<1): sharper, more confident predictions.  
-  - High temperature (>1): flatter, more uncertain predictions.
-
-- **Exponential Decay Weighting**  
-  Used in Rolling Form and Pace Score. Ensures **recent performance weighs more heavily**, while older results fade smoothly.  
-
-- **Monte Carlo Simulation**  
-  Randomized simulations are run repeatedly to model finishing orders and season outcomes.  
-  Captures the **inherent unpredictability** of F1 by accounting for rare events and random variance.
-
----
+## ▶️ Running Order
+fastf1.py processes raw race and qualifying data. rolling_form.py generates rolling form, reliability metrics, and pace features. quali_feat.py builds qualifying-based features. predictor_with_quali_results.py produces race-level predictions after qualifying. remaining_race_simulator.py runs Monte Carlo simulations for race and WDC outcome estimation.
 
 ## 🚀 How It Works
-- **Input**: Raw FIA race + quali timing data (2018–2025).  
-- **Processing**: Extract features (form, pace, track history, reliability).  
-- **Prediction**: Weighted driver strength → win probability.  
-- **Simulation**: Monte Carlo → race distributions → season outcome.  
+Raw FIA race and qualifying data is processed into structured performance features. These features are combined into weighted driver scores, converted into probabilistic outcomes, and simulated repeatedly using Monte Carlo methods. Predictions are then evaluated against real race results and presented through the interactive website.
 
+## 🔮 Next Steps
+The next project will focus on building a song recommendation system using user interaction data and machine learning techniques to generate personalized recommendations that improve over time.
