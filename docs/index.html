@@ -337,7 +337,8 @@
     list.forEach((d,i) => {
       const p = i+1;
       const a = otherMap.get(d);
-      const cls = !a ? "miss" : (p===a ? "match" : (Math.abs(p-a)<=2 ? "close" : "miss"));
+      const diff = a ? Math.abs(p - a) : null;
+      const cls = !a ? "miss" : (diff <= 1 ? "match" : (diff <= 3 ? "close" : "miss"));
       target.innerHTML +=
         `<div class="row">
            <span class="pos">P${p}</span>
