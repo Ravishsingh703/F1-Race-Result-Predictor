@@ -237,10 +237,10 @@
 
   function cls(predPos, actualPos){
     if(!actualPos) return "miss";
-    const diff = Math.abs(predPos-actualPos);
-    if(diff === 0) return "match";
-    if(diff <= 2) return "close";
-    return "miss";
+    const diff = Math.abs(predPos - actualPos);
+    if(diff <= 1) return "match";     // ✅ green for ±1
+    if(diff <= 3) return "close";     // 🟡 close up to ±3
+    return "miss";                   // 🔴 otherwise
   }
 
   function renderList(list, actualMap, container){
